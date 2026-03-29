@@ -59,8 +59,10 @@ function decodeToPCM(filePath) {
     stdio: ['pipe', 'pipe', 'pipe'],
   });
 
-  // Convert Buffer to Float32Array (shares the same underlying ArrayBuffer)
-  return new Float32Array(buf.buffer, buf.byteOffset, Math.floor(buf.length / 4));
+  // Copy into a fresh, aligned ArrayBuffer (Buffer.byteOffset may not be 4-byte aligned,
+  // which causes a RangeError when creating a Float32Array view directly).
+  const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length);
+  return new Float32Array(ab);
 }
 
 function buildWaveform(samples, numPoints = 500) {

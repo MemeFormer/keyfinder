@@ -120,8 +120,8 @@ function renderTable() {
     tdWave.className = 'col-waveform';
     if (t.waveform && t.waveform.length > 0) {
       const canvas = document.createElement('canvas');
-      canvas.width = 84;
-      canvas.height = 24;
+      canvas.width = 94;
+      canvas.height = 28;
       canvas.className = 'waveform';
       drawWaveform(canvas, t.waveform);
       tdWave.appendChild(canvas);
@@ -137,7 +137,7 @@ function drawWaveform(canvas, waveform) {
   const w = canvas.width;
   const h = canvas.height;
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = '#555';
+  ctx.fillStyle = '#fff';
   const barW = w / waveform.length;
   for (let i = 0; i < waveform.length; i++) {
     const barH = Math.max(1, waveform[i] * h);
