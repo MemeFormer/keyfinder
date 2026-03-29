@@ -1,0 +1,168 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #000;
+  --fg: #fff;
+  --muted: #666;
+  --border: #222;
+  --hover: #111;
+  --font: 'Consolas', 'Courier New', monospace;
+  --font-size: 12px;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: var(--font-size);
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+}
+
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+#toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#logo { font-size: 14px; font-weight: bold; letter-spacing: 3px; margin-right: 8px; }
+#toolbar-actions { display: flex; align-items: center; gap: 6px; flex: 1; }
+
+button {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 11px;
+  padding: 4px 10px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+button:hover:not(:disabled) { border-color: var(--fg); }
+button:disabled { color: var(--muted); cursor: default; }
+
+#export-menu-wrapper { position: relative; }
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: #111;
+  border: 1px solid var(--border);
+  z-index: 100;
+  min-width: 180px;
+}
+
+.dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 6px 12px;
+}
+
+.dropdown button:last-child { border-bottom: none; }
+.dropdown .separator { height: 1px; background: var(--border); }
+.hidden { display: none !important; }
+
+#search-wrapper { margin-left: auto; }
+#search-input {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 11px;
+  padding: 4px 8px;
+  width: 180px;
+  letter-spacing: 1px;
+}
+#search-input:focus { outline: none; border-color: var(--fg); }
+#search-input::placeholder { color: var(--muted); }
+#track-count { color: var(--muted); font-size: 11px; }
+
+#drop-zone {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--border);
+  margin: 16px;
+}
+
+#drop-zone.drag-over { border-color: var(--fg); }
+#drop-zone-inner { text-align: center; }
+#drop-icon { font-size: 48px; margin-bottom: 16px; color: var(--muted); }
+#drop-text { font-size: 16px; letter-spacing: 4px; margin-bottom: 8px; }
+#drop-subtext { color: var(--muted); margin-bottom: 12px; }
+#drop-formats { color: var(--muted); font-size: 11px; letter-spacing: 2px; }
+
+#table-wrapper { flex: 1; overflow-y: auto; overflow-x: hidden; }
+#table-wrapper::-webkit-scrollbar { width: 4px; }
+#table-wrapper::-webkit-scrollbar-track { background: var(--bg); }
+#table-wrapper::-webkit-scrollbar-thumb { background: var(--border); }
+
+#track-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+#track-table thead { position: sticky; top: 0; background: var(--bg); z-index: 10; }
+#track-table th {
+  padding: 6px 8px;
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  font-weight: normal;
+}
+
+.col-art      { width: 40px; }
+.col-track    { width: auto; }
+.col-key      { width: 60px; }
+.col-camelot  { width: 72px; }
+.col-bpm      { width: 70px; }
+.col-dur      { width: 58px; }
+.col-waveform { width: 100px; }
+
+#track-table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+#track-table tr:hover td { background: var(--hover); }
+
+.track-art { width: 28px; height: 28px; object-fit: cover; display: block; }
+.art-placeholder {
+  width: 28px; height: 28px; background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--muted);
+}
+
+.track-name { font-size: 11px; }
+.track-artist { font-size: 10px; color: var(--muted); }
+.cell-key { font-weight: bold; }
+.cell-camelot { color: var(--muted); }
+.cell-dur { color: var(--muted); }
+.status-analyzing { color: var(--muted); animation: pulse 1s infinite; }
+.status-error { color: #f44; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity: 0.4; } }
+canvas.waveform { display: block; }
+
+#statusbar {
+  display: flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
