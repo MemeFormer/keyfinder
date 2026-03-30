@@ -13,19 +13,21 @@
     "appId": "com.keyfinder.app",
     "productName": "KeyFinder",
     "win": {
-      "target": "nsis",
+      "target": [
+        { "target": "portable", "arch": ["x64", "arm64"] },
+        { "target": "nsis",     "arch": ["x64", "arm64"] }
+      ],
       "icon": "assets/icon.ico",
       "requestedExecutionLevel": "asInvoker"
+    },
+    "portable": {
+      "splashImage": null
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "allowElevation": true,
       "perMachine": false,
-      "deleteAppDataOnUninstall": false,
-      "runAfterFinish": true,
-      "installerLanguages": ["en_US"],
-      "warningsAsErrors": false
+      "deleteAppDataOnUninstall": false
     },
     "files": [
       "main.js",
