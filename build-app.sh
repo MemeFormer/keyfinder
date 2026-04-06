@@ -126,4 +126,4 @@ echo "Creating DMG..."
 ./make-dmg.sh
 
 echo ""
-echo "✅ DMG created: KeyFinder-v1.7.dmg"
+echo "✅ DMG created: KeyFinder-v1.8.dmg"

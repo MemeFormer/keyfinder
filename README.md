@@ -138,7 +138,7 @@ If the app builds successfully but displays a strikethrough icon in Finder ("app
 This occurs because the app's `Info.plist` requires a minimum macOS version of `13.0`, which triggers strict hardware checks on patched older machines. 
 
 **To resolve this manually:**
-1. Open the built `KeyFinder-v1.7.dmg` file.
+1. Open the built `KeyFinder-v1.8.dmg` file.
 2. **Important:** Drag `KeyFinder.app` out of the `.dmg` and into your `/Applications` folder (or Desktop). *Do not try to edit it inside the `.dmg` or you will get a "read-only file system" error.*
 3. Right-click the extracted `KeyFinder.app` and select **Show Package Contents**.
 4. Navigate to `Contents/Info.plist` and open it in a text editor.
