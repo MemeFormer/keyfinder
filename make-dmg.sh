@@ -41,7 +41,7 @@ cat > "${STAGING}/${APP_NAME}.app/Contents/Info.plist" << 'EOF'
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>LSMinimumSystemVersion</key>
-    <string>13.0</string>
+    <string>12.0</string>
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSPrincipalClass</key>
@@ -84,7 +84,7 @@ STEP 2 — First Launch (important)
   You only need to do this ONCE.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Requires macOS 13.0 or later
+  Requires macOS 12.0 or later
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
 
