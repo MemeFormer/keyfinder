@@ -9,7 +9,7 @@
   4. Signs with ad-hoc signature
   5. **Auto-creates DMG** in project folder
 
-- **DMG naming**: Always `KeyFinder-v1.7.dmg` (version 1.7)
+- **DMG naming**: Always `KeyFinder-v1.9.dmg` (version 1.9)
 
 ## UI/UX Requirements
 
@@ -34,7 +34,7 @@ ART | TRACK | KEY | CAMELOT | BPM | DUR | WAVEFORM
 - Monospace fonts
 - Clean drop zone for file import
 
-## Features Implemented (v1.7)
+## Features Implemented (v1.9)
 
 ### Core Analysis
 - Key detection (Krumhansl-Schmuckler algorithm)

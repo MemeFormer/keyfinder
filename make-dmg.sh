@@ -3,7 +3,7 @@
 set -e
 
 APP_NAME="KeyFinder"
-VERSION="1.8"
+VERSION="1.9"
 DMG_NAME="${APP_NAME}-v${VERSION}.dmg"
 STAGING="build/dmg-staging"
 BUILD_DIR=".build/arm64-apple-macosx/release"
@@ -33,9 +33,9 @@ cat > "${STAGING}/${APP_NAME}.app/Contents/Info.plist" << 'EOF'
     <key>CFBundleName</key>
     <string>KeyFinder</string>
     <key>CFBundleVersion</key>
-    <string>1.8</string>
+    <string>1.9</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.8</string>
+    <string>1.9</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleInfoDictionaryVersion</key>
@@ -66,7 +66,7 @@ fi
 # Create install instructions
 cat > "${STAGING}/HOW TO INSTALL.txt" << 'EOF'
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  KeyFinder v1.8 — Installation Guide
+  KeyFinder v1.9 — Installation Guide
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 STEP 1

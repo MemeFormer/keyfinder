@@ -3,6 +3,7 @@ import SwiftUI
 struct AnalysisLogView: View {
     @ObservedObject var model: AudioAnalysisModel
     @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.dismiss) private var dismiss
     @State private var autoScroll = true
     @State private var filterType: AnalysisLogEntry.LogType? = nil
 
@@ -26,6 +27,14 @@ struct AnalysisLogView: View {
                 Text("\(filteredLog.count) entries")
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundColor(themeManager.tertiaryTextColor)
+
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(themeManager.tertiaryTextColor)
+                }
+                .buttonStyle(.plain)
+                .help("Close")
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -141,6 +150,9 @@ struct AnalysisLogView: View {
             .background(themeManager.surfaceColor)
         }
         .background(themeManager.backgroundColor)
+        .onExitCommand {
+            dismiss()
+        }
     }
 }
 

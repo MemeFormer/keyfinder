@@ -5,7 +5,7 @@
 set -e
 
 APP_NAME="KeyFinder"
-VERSION="1.5"
+VERSION="1.9"
 BUNDLE_ID="com.keyfinder.app"
 DMG_NAME="${APP_NAME}-v${VERSION}.dmg"
 
