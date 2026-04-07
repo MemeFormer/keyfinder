@@ -3,7 +3,7 @@
 set -e
 
 APP_NAME="KeyFinder"
-VERSION="1.7"
+VERSION="1.8"
 DMG_NAME="${APP_NAME}-v${VERSION}.dmg"
 STAGING="build/dmg-staging"
 BUILD_DIR=".build/arm64-apple-macosx/release"
@@ -33,15 +33,15 @@ cat > "${STAGING}/${APP_NAME}.app/Contents/Info.plist" << 'EOF'
     <key>CFBundleName</key>
     <string>KeyFinder</string>
     <key>CFBundleVersion</key>
-    <string>1.7</string>
+    <string>1.8</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.7</string>
+    <string>1.8</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>LSMinimumSystemVersion</key>
-    <string>13.0</string>
+    <string>12.0</string>
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSPrincipalClass</key>
@@ -66,7 +66,7 @@ fi
 # Create install instructions
 cat > "${STAGING}/HOW TO INSTALL.txt" << 'EOF'
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  KeyFinder v1.7 — Installation Guide
+  KeyFinder v1.8 — Installation Guide
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 STEP 1
@@ -84,7 +84,7 @@ STEP 2 — First Launch (important)
   You only need to do this ONCE.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Requires macOS 13.0 or later
+  Requires macOS 12.0 or later
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
 

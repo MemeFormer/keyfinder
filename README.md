@@ -30,14 +30,14 @@ A professional macOS app and VST plugin for detecting musical key, Camelot notat
 
 1. Open Terminal and navigate to the project directory
 2. Build and run using Swift Package Manager:
-   ```bash
-   swift build
-   swift run
-   ```
+```bash
+swift build
+swift run
+```
 
 ### Creating an Xcode Project (Optional)
 
-To open in Xcode for easier development:
+ To open in Xcode for easier development:
 ```bash
 open Package.swift
 ```
@@ -50,16 +50,16 @@ open KeyFinder.xcodeproj
 
 ## Usage
 
-### Desktop App
+ ### Desktop App
 1. Launch the app
 2. Drag and drop **one or multiple audio files** onto the window
 3. App automatically analyzes all files in sequence
 4. View results in table format:
-   - Album art (if embedded)
-   - Track name
-   - Musical key
-   - Camelot notation
-   - BPM
+     - Album art (if embedded)
+     - Track name
+     - Musical key
+     - Camelot notation
+     - BPM
 5. Drop more files to add to the batch
 6. Click "CLEAR ALL" to start fresh
 
@@ -91,7 +91,7 @@ Implements onset-based tempo detection:
 - WAV
 - M4A
 - FLAC
-- AIFF/AIF
+- AIFF/AIF                          
 
 ## Architecture
 
@@ -121,6 +121,34 @@ KeyFinderVST/
 │   └── BPMDetector.h/cpp          # C++ port of BPM detection
 └── KeyFinderVST.jucer             # JUCE project file
 ```
+
+## Troubleshooting: OCLP & Unsupported macOS Hardware
+
+If you are running macOS via OpenCore Legacy Patcher (OCLP) or using older, unsupported Apple hardware, you may encounter specific build and execution blocks.
+
+**1. App Store blocks Xcode download**
+OCLP spoofs macOS version numbers, which can cause the Mac App Store to block the full Xcode download. Since `xcode-select --install` does not provide the full toolchain required for `swift build`, you can bypass the App Store entirely by installing the standalone Swift toolchain via Homebrew:
+```bash
+brew install swift
+```
+
+**2. Application displays a prohibitory "Strikethrough" icon**
+If the app builds successfully but displays a strikethrough icon in Finder ("application is not supported on this Mac"), this is a LaunchServices OS/Hardware block, **not** a Gatekeeper/Quarantine issue. Standard workarounds like `Right-Click -> Open` or removing quarantine flags will not work.
+
+This occurs because the app's `Info.plist` requires a minimum macOS version of `13.0`, which triggers strict hardware checks on patched older machines. 
+
+**To resolve this manually:**
+1. Open the built `KeyFinder-v1.8.dmg` file.
+2. **Important:** Drag `KeyFinder.app` out of the `.dmg` and into your `/Applications` folder (or Desktop). *Do not try to edit it inside the `.dmg` or you will get a "read-only file system" error.*
+3. Right-click the extracted `KeyFinder.app` and select **Show Package Contents**.
+4. Navigate to `Contents/Info.plist` and open it in a text editor.
+5. Locate the minimum system version key:
+```xml
+<key>LSMinimumSystemVersion</key>
+<string>13.0</string>
+```
+6. Change `13.0` to `12.0` and save the file.
+7. The strikethrough icon should disappear (you may need to relaunch Finder or move the app to refresh the icon cache), and the app will now launch successfully.
 
 ## License
 
