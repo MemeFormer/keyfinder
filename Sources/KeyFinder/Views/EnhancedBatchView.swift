@@ -9,6 +9,7 @@ struct EnhancedBatchView: View {
     @State private var showHelp = false
     @State private var showCamelotWheel = false
     @State private var showAnalysisLog = false
+    @State private var showTagWritingSettings = false
     @State private var editingTagsTrackIndex: Int?
     @State private var editingCuesTrackIndex: Int?
     @State private var expandedTrackIndex: Int?  // Track with expanded waveform
@@ -80,6 +81,13 @@ struct EnhancedBatchView: View {
                 .environmentObject(themeManager)
                 .frame(minWidth: 600, minHeight: 400)
         }
+        .sheet(isPresented: $showTagWritingSettings) {
+            TagWritingSettingsView(
+                preferences: $model.tagWritingPreferences,
+                previewMetadata: previewMetadata
+            )
+            .environmentObject(themeManager)
+        }
         // .sheet(isPresented: $showSmartDJPanel) {
         //     SmartDJPanel(model: model)
         //         .environmentObject(themeManager)
@@ -90,6 +98,30 @@ struct EnhancedBatchView: View {
         //         .environmentObject(themeManager)
         //         .frame(minWidth: 700, minHeight: 500)
         // }
+    }
+
+    private var previewMetadata: TrackMetadata {
+        guard let first = model.tracks.first else {
+            return TrackMetadata(filename: "", filepath: "")
+        }
+        return TrackMetadata(
+            keyCamelot: first.camelotNotation,
+            keyOpen: KeyNotationConverter.openFromCamelot(first.camelotNotation),
+            keyTraditional: first.key,
+            bpm: Double(first.bpm ?? ""),
+            energy: first.energy,
+            title: first.title ?? first.fileName.replacingOccurrences(of: ".mp3", with: ""),
+            artist: first.artist,
+            album: nil,
+            year: first.year,
+            filename: first.fileName,
+            filepath: first.filePath.path,
+            trackNumber: nil,
+            comment: first.comment,
+            grouping: nil,
+            tkey: nil,
+            customText: ["KEYFINDER_KEY": first.key ?? "", "MIXEDINKEY": first.camelotNotation ?? ""]
+        )
     }
 
     private var headerView: some View {
@@ -140,6 +172,16 @@ struct EnhancedBatchView: View {
             Spacer()
 
             if !model.tracks.isEmpty {
+                Button(action: { showTagWritingSettings = true }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "slider.horizontal.3")
+                        Text("TAG SETTINGS")
+                    }
+                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                    .foregroundColor(themeManager.secondaryTextColor)
+                }
+                .buttonStyle(.plain)
+
                 // Export dropdown menu
                 Menu {
                     Button(action: {

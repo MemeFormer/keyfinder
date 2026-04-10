@@ -70,6 +70,20 @@ open KeyFinder.xcodeproj
 4. Click "ANALYZE" to capture 5 seconds of audio
 5. View results directly in plugin window
 
+
+## Traktor Tag Writing (macOS)
+
+KeyFinder includes a Traktor-oriented ID3 writer for MP3 files with:
+- configurable per-field mapping (`COMM`, `TKEY`, `TIT1`, `TXXX`)
+- template-driven formatting with key notation options
+- dry-run preview and batch-safe atomic writes
+- backup/undo store for written batches
+- preserves existing non-target ID3 frames while updating mapped fields
+
+See:
+- `docs/tag-writing.md`
+- `docs/traktor-setup.md`
+
 ## Technical Details
 
 ### Key Detection
