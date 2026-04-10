@@ -5,20 +5,49 @@ set -e
 
 echo "Building KeyFinder..."
 
-# Build universal binary (Intel + Apple Silicon)
-echo "Building for Intel (x86_64)..."
-swift build -c release --arch x86_64
+# Build modes:
+# - universal (default): build both Intel and Apple Silicon and merge with lipo
+# - host: build only the host architecture
+BUILD_MODE="${BUILD_MODE:-universal}"
+USER_SET_ARCHS="${ARCHS+x}"
+ARCHS="${ARCHS:-x86_64 arm64}"
 
-echo "Building for Apple Silicon (arm64)..."
-swift build -c release --arch arm64
+if [ "${BUILD_MODE}" = "host" ] && [ -z "${USER_SET_ARCHS}" ]; then
+    HOST_ARCH=$(uname -m)
+    if [ "${HOST_ARCH}" = "x86_64" ]; then
+        ARCHS="x86_64"
+    elif [ "${HOST_ARCH}" = "arm64" ]; then
+        ARCHS="arm64"
+    else
+        echo "❌ Unsupported host architecture: ${HOST_ARCH}"
+        exit 1
+    fi
+fi
 
-echo "Creating universal binary..."
-# Create universal binary using lipo
+echo "Build mode: ${BUILD_MODE}"
+echo "Architectures: ${ARCHS}"
+echo "Swift toolchain: $(swift --version | head -1)"
+
+for ARCH in ${ARCHS}; do
+    echo "Building for ${ARCH}..."
+    swift build -c release --arch "${ARCH}"
+done
+
 mkdir -p .build/universal
-lipo -create \
-    .build/x86_64-apple-macosx/release/KeyFinder \
-    .build/arm64-apple-macosx/release/KeyFinder \
-    -output .build/universal/KeyFinder
+
+if [ "$(echo "${ARCHS}" | wc -w | tr -d ' ')" -eq 1 ]; then
+    ONLY_ARCH="${ARCHS}"
+    echo "Single-arch build detected (${ONLY_ARCH}); using that binary directly..."
+    cp ".build/${ONLY_ARCH}-apple-macosx/release/KeyFinder" .build/universal/KeyFinder
+else
+    echo "Creating universal binary with lipo..."
+    LIPO_INPUTS=""
+    for ARCH in ${ARCHS}; do
+        LIPO_INPUTS="${LIPO_INPUTS} .build/${ARCH}-apple-macosx/release/KeyFinder"
+    done
+    # shellcheck disable=SC2086
+    lipo -create ${LIPO_INPUTS} -output .build/universal/KeyFinder
+fi
 
 # Create app bundle structure
 APP_NAME="KeyFinder"
