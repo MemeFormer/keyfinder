@@ -35,6 +35,30 @@ swift build
 swift run
 ```
 
+### Building a macOS App Bundle (`build-app.sh`)
+
+`build-app.sh` now supports both release-style universal builds and contributor-friendly host-only builds:
+
+- **Default (universal):** builds `x86_64` + `arm64` and merges with `lipo`
+- **Host-only:** builds only the current Mac architecture (useful on Intel + OCLP/Homebrew Swift setups)
+- **Custom architectures:** override with `ARCHS`
+
+Examples:
+
+```bash
+# Universal build (default)
+./build-app.sh
+
+# Host-only build (auto-detects x86_64 or arm64)
+BUILD_MODE=host ./build-app.sh
+
+# Explicit Intel-only build
+ARCHS="x86_64" ./build-app.sh
+
+# Explicit Apple Silicon-only build
+ARCHS="arm64" ./build-app.sh
+```
+
 ### Creating an Xcode Project (Optional)
 
  To open in Xcode for easier development:
