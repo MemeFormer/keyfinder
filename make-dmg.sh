@@ -6,62 +6,23 @@ APP_NAME="KeyFinder"
 VERSION="1.9"
 DMG_NAME="${APP_NAME}-v${VERSION}.dmg"
 STAGING="build/dmg-staging"
-BUILD_DIR=".build/arm64-apple-macosx/release"
+PREBUILT_APP="build/${APP_NAME}.app"
 
-# Build the app first
-swift build -c release
+# Skip build - use already-built app from build-app.sh
+if [ ! -d "${PREBUILT_APP}" ]; then
+    echo "❌ Error: No built app found at ${PREBUILT_APP}"
+    echo "   Run build-app.sh first"
+    exit 1
+fi
+
+echo "Using pre-built app: ${PREBUILT_APP}"
 
 # Create staging folder
 rm -rf "${STAGING}"
 mkdir -p "${STAGING}"
-mkdir -p "${STAGING}/${APP_NAME}.app/Contents/MacOS"
-mkdir -p "${STAGING}/${APP_NAME}.app/Contents/Resources"
 
-# Copy the executable
-cp "${BUILD_DIR}/${APP_NAME}" "${STAGING}/${APP_NAME}.app/Contents/MacOS/"
-
-# Create Info.plist
-cat > "${STAGING}/${APP_NAME}.app/Contents/Info.plist" << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>CFBundleExecutable</key>
-    <string>KeyFinder</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.keyfinder.app</string>
-    <key>CFBundleName</key>
-    <string>KeyFinder</string>
-    <key>CFBundleVersion</key>
-    <string>1.9</string>
-    <key>CFBundleShortVersionString</key>
-    <string>1.9</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleInfoDictionaryVersion</key>
-    <string>6.0</string>
-    <key>LSMinimumSystemVersion</key>
-    <string>12.0</string>
-    <key>NSHighResolutionCapable</key>
-    <true/>
-    <key>NSPrincipalClass</key>
-    <string>NSApplication</string>
-    <key>CFBundleIconFile</key>
-    <string>AppIcon</string>
-</dict>
-</plist>
-EOF
-
-# Copy app icon if it exists
-if [ -f "AppIcon.icns" ]; then
-    cp "AppIcon.icns" "${STAGING}/${APP_NAME}.app/Contents/Resources/"
-    echo "✓ App icon added"
-fi
-
-# Copy Resources if they exist
-if [ -d "Sources/KeyFinder/Resources" ]; then
-    cp -R "Sources/KeyFinder/Resources/"* "${STAGING}/${APP_NAME}.app/Contents/Resources/" 2>/dev/null || true
-fi
+# Copy the pre-built app
+cp -R "${PREBUILT_APP}" "${STAGING}/"
 
 # Create install instructions
 cat > "${STAGING}/HOW TO INSTALL.txt" << 'EOF'

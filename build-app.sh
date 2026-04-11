@@ -3,7 +3,17 @@
 # Build script for KeyFinder macOS app
 set -e
 
+# Detect brew Swift if available (for OCLP/Homebrew Swift setups)
+if [ -x "/usr/local/Cellar/swift/6.2.4/bin/swift" ]; then
+    SWIFT="/usr/local/Cellar/swift/6.2.4/bin/swift"
+elif [ -x "/opt/homebrew/bin/swift" ]; then
+    SWIFT="/opt/homebrew/bin/swift"
+else
+    SWIFT="swift"
+fi
+
 echo "Building KeyFinder..."
+echo "Swift: $($SWIFT --version)"
 
 # Build modes:
 # - universal (default): build both Intel and Apple Silicon and merge with lipo
@@ -26,11 +36,10 @@ fi
 
 echo "Build mode: ${BUILD_MODE}"
 echo "Architectures: ${ARCHS}"
-echo "Swift toolchain: $(swift --version | head -1)"
 
 for ARCH in ${ARCHS}; do
     echo "Building for ${ARCH}..."
-    swift build -c release --arch "${ARCH}"
+    $SWIFT build -c release --arch "${ARCH}"
 done
 
 mkdir -p .build/universal
