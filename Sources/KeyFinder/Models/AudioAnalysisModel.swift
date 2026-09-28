@@ -69,6 +69,7 @@ class AudioAnalysisModel: ObservableObject {
     @Published var filterBPMMax: Double?
     @Published var activePreset: DJPreset?
     @Published var analysisLog: [AnalysisLogEntry] = []
+    @Published var tagWritingPreferences = TagWritingPreferences()
 
     // Smart DJ features
     @Published var generatedMixPlaylist: [TrackAnalysis] = []
@@ -77,6 +78,7 @@ class AudioAnalysisModel: ObservableObject {
 
     private let audioProcessor = AudioProcessor()
     private let albumArtExtractor = AlbumArtExtractor()
+    private let tagWriteService = TagWriteBatchService()
 
     // MARK: - Analysis Log Helpers
 
@@ -1131,39 +1133,83 @@ class AudioAnalysisModel: ObservableObject {
     // MARK: - Direct Tag Writing
 
     func writeTagsToFiles() -> URL? {
-        // For tag writing, we need to select files first
         let openPanel = NSOpenPanel()
-        openPanel.title = "Select Audio Files to Write Tags"
+        openPanel.title = "Select MP3 Files to Write Tags"
         openPanel.allowsMultipleSelection = true
         openPanel.canChooseDirectories = false
-        openPanel.allowedContentTypes = [.mp3, .mpeg4Audio, .wav, .aiff]
+        openPanel.allowedContentTypes = [.mp3]
 
         guard openPanel.runModal() == .OK, !openPanel.urls.isEmpty else {
             return nil
         }
 
-        var successCount = 0
-        var failedFiles: [String] = []
+        let files = openPanel.urls
+        let metadataByURL = buildWriteMetadata(for: files)
 
-        for url in openPanel.urls {
-            do {
-                try writeTagsToFile(at: url)
-                successCount += 1
-            } catch {
-                failedFiles.append(url.lastPathComponent)
+        // Phase 1: Dry-run preview
+        let dryRunOptions = WriteOptions(
+            dryRun: true,
+            createBackup: false,
+            forceOverwrite: tagWritingPreferences.forceOverwrite,
+            mappings: tagWritingPreferences.mappings
+        )
+        let dryRunSummary = tagWriteService.writeBatch(fileURLs: files, metadataByURL: metadataByURL, options: dryRunOptions, maxConcurrentWrites: tagWritingPreferences.maxConcurrentWrites)
+
+        // Phase 2: Actual write with backup (unless dry-run only preference enabled)
+        let writeSummary: TagWriteBatchSummary
+        if tagWritingPreferences.dryRunOnly {
+            writeSummary = TagWriteBatchSummary(batchID: dryRunSummary.batchID, results: dryRunSummary.results)
+        } else {
+            let writeOptions = WriteOptions(
+                dryRun: false,
+                createBackup: tagWritingPreferences.createBackup,
+                forceOverwrite: tagWritingPreferences.forceOverwrite,
+                mappings: tagWritingPreferences.mappings
+            )
+            writeSummary = tagWriteService.writeBatch(fileURLs: files, metadataByURL: metadataByURL, options: writeOptions, maxConcurrentWrites: tagWritingPreferences.maxConcurrentWrites)
+        }
+
+        let resultURL = FileManager.default.temporaryDirectory.appendingPathComponent("keyfinder_tag_write_result.txt")
+        var resultText = "Tag Writing Results
+"
+        resultText += "==================
+"
+        resultText += "Batch ID: \(writeSummary.batchID.uuidString)
+"
+        resultText += "Dry-run preview for \(dryRunSummary.results.count) files completed.
+"
+        resultText += "Successfully wrote tags to \(writeSummary.successes.count) files.
+"
+        resultText += "Failed writes: \(writeSummary.failures.count).
+
+"
+
+        resultText += "Dry-run changes:
+"
+        for result in dryRunSummary.results.sorted(by: { $0.fileURL.lastPathComponent < $1.fileURL.lastPathComponent }) {
+            let changeSummary = result.changes.isEmpty ? "No changes" : result.changes.joined(separator: " | ")
+            resultText += "- \(result.fileURL.lastPathComponent): \(changeSummary)
+"
+        }
+
+        if !writeSummary.failures.isEmpty {
+            resultText += "
+Failed files:
+"
+            for failed in writeSummary.failures {
+                resultText += "- \(failed.fileURL.lastPathComponent): \(failed.errors.joined(separator: "; "))
+"
             }
         }
 
-        // Create result file
-        let resultURL = FileManager.default.temporaryDirectory.appendingPathComponent("keyfinder_tag_write_result.txt")
-        var resultText = "Tag Writing Results\n"
-        resultText += "==================\n"
-        resultText += "Successfully wrote tags to \(successCount) files.\n"
-
-        if !failedFiles.isEmpty {
-            resultText += "\nFailed files:\n"
-            for file in failedFiles {
-                resultText += "  - \(file)\n"
+        if let first = files.first {
+            let verification = tagWriteService.traktorVerification(for: first)
+            resultText += "
+Traktor verification sample (\(first.lastPathComponent)):
+"
+            for (frame, value) in verification.sorted(by: { $0.key < $1.key }) {
+                resultText += "- \(frame): \(value)
+"
             }
         }
 
@@ -1171,18 +1217,39 @@ class AudioAnalysisModel: ObservableObject {
         return resultURL
     }
 
-    private func writeTagsToFile(at url: URL) throws {
-        // Tag writing requires more complex handling - for now, just log what would be written
-        // Find matching track from our analysis
-        let matchingTrack = tracks.first { $0.filePath == url }
+    private func buildWriteMetadata(for files: [URL]) -> [URL: TrackMetadata] {
+        var mapping: [URL: TrackMetadata] = [:]
+        for url in files {
+            let track = tracks.first { $0.filePath == url }
+            let camelot = track?.camelotNotation
+            let traditional = track?.key ?? KeyNotationConverter.traditionalFromCamelot(camelot)
+            let open = KeyNotationConverter.openFromCamelot(camelot)
+            let bpm = Double(track?.bpm ?? "")
 
-        if let track = matchingTrack {
-            // Log what would be written
-            print("Would write tags to: \(url.lastPathComponent)")
-            print("  Key: \(track.key ?? "unknown")")
-            print("  BPM: \(track.bpm ?? "unknown")")
-            print("  Camelot: \(track.camelotNotation ?? "unknown")")
+            let metadata = TrackMetadata(
+                keyCamelot: camelot,
+                keyOpen: open,
+                keyTraditional: traditional,
+                bpm: bpm,
+                energy: track?.energy,
+                title: track?.title,
+                artist: track?.artist,
+                album: nil,
+                year: track?.year,
+                filename: url.lastPathComponent,
+                filepath: url.path,
+                trackNumber: nil,
+                comment: track?.comment,
+                grouping: nil,
+                tkey: nil,
+                customText: [
+                    "MIXEDINKEY": camelot ?? "",
+                    "KEYFINDER_KEY": traditional ?? ""
+                ]
+            )
+            mapping[url] = metadata
         }
+        return mapping
     }
 
     // MARK: - Helper Functions
